@@ -1,65 +1,129 @@
 
-import { Github, Twitter, Discord, Instagram } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { 
+  Twitter, 
+  Github,
+  Globe,
+  Mail
+} from "lucide-react";
 
-const Footer = () => {
+export function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-primary/5 border-t">
+      <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo and Description */}
-          <div className="col-span-1">
-            <h3 className="text-2xl font-bold gradient-text mb-4">ArtfulNFT</h3>
-            <p className="text-gray-400 mb-6">
-              The premier destination for discovering, collecting, and trading unique digital art and NFTs.
+          <div className="col-span-1 md:col-span-1">
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/Logo_C8.png"  
+                alt="CRE8TAR" 
+                className="h-10 w-10 mr-2" 
+              />
+            </Link>
+            <p className="mt-4 text-sm text-muted-foreground">
+              The next generation of emotionally intelligent AI companions, powered by blockchain.
             </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Platform</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/mint" className="text-muted-foreground hover:text-foreground">
+                  Avatar Minting
+                </Link>
+              </li>
+              <li>
+                <Link to="/companion" className="text-muted-foreground hover:text-foreground">
+                  AI Companion
+                </Link>
+              </li>
+              <li>
+                <Link to="/marketplace" className="text-muted-foreground hover:text-foreground">
+                  Marketplace
+                </Link>
+              </li>
+              <li>
+                <Link to="/fusion" className="text-muted-foreground hover:text-foreground">
+                  Fusion Lab
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Resources</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/whitepaper" className="text-muted-foreground hover:text-foreground">
+                  Whitepaper
+                </Link>
+              </li>
+              <li>
+                <a 
+                  href="https://cre8tar.gitbook.io/cre8tar" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Documentation
+                </a>
+              </li>
+              <li>
+                <Link to="/whitepaper" className="text-muted-foreground hover:text-foreground">
+                  Token Economics
+                </Link>
+              </li>
+              <li>
+                <a 
+                  href="https://cre8tar.com/api-reference" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  API Reference
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Connect</h3>
             <div className="flex space-x-4">
-              <Twitter className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
-              <Discord className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
-              <Instagram className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
-              <Github className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+              <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Twitter className="h-5 w-5" />
+                <span className="sr-only">Twitter</span>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Github className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Globe className="h-5 w-5" />
+                <span className="sr-only">Website</span>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Mail className="h-5 w-5" />
+                <span className="sr-only">Email</span>
+              </a>
             </div>
-          </div>
-
-          {/* Marketplace */}
-          <div>
-            <h4 className="font-semibold mb-4">Marketplace</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Explore</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Collections</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Top Artists</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Trending</a></li>
-            </ul>
-          </div>
-
-          {/* Community */}
-          <div>
-            <h4 className="font-semibold mb-4">Community</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Newsletter</a></li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-            </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 ArtfulNFT. All rights reserved. Built with passion for digital art.</p>
+        <div className="mt-12 pt-6 border-t flex flex-col md:flex-row justify-between items-center">
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Cre8tar.com All rights reserved.
+          </p>
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <a href="#" className="text-xs text-muted-foreground hover:text-foreground">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-xs text-muted-foreground hover:text-foreground">
+              Terms of Service
+            </a>
+          </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
