@@ -92,14 +92,17 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
     
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
+      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
     
     if (formData.personalityTraits.length === 0) {
       console.error('No personality traits selected');
+      alert('Please add at least one personality trait');
       return;
     }
     
+    console.log('All validations passed, calling onMint');
     onMint(formData);
   };
 
@@ -110,56 +113,56 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
   return (
     <Card className="glass-card-strong border-white/30">
       <CardHeader>
-        <CardTitle className="text-white">Create Your Avatar NFT</CardTitle>
+        <CardTitle className="text-white dark:text-white text-gray-900">Create Your Avatar NFT</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">Avatar Name *</Label>
+              <Label htmlFor="name" className="text-white dark:text-white text-gray-900">Avatar Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter avatar name"
-                className="glass-input text-white placeholder:text-white/50"
+                className="glass-input text-white dark:text-white text-gray-900 placeholder:text-white/50 dark:placeholder:text-white/50 placeholder:text-gray-500"
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="avatarId" className="text-white">Avatar ID *</Label>
+              <Label htmlFor="avatarId" className="text-white dark:text-white text-gray-900">Avatar ID *</Label>
               <Input
                 id="avatarId"
                 value={formData.avatarId}
                 onChange={(e) => handleInputChange("avatarId", e.target.value)}
                 placeholder="Maya/Blender/Unreal Engine ID"
-                className="glass-input text-white placeholder:text-white/50"
+                className="glass-input text-white dark:text-white text-gray-900 placeholder:text-white/50 dark:placeholder:text-white/50 placeholder:text-gray-500"
                 required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-white">Description</Label>
+            <Label htmlFor="description" className="text-white dark:text-white text-gray-900">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Describe your avatar..."
-              className="glass-input text-white placeholder:text-white/50 min-h-[80px]"
+              className="glass-input text-white dark:text-white text-gray-900 placeholder:text-white/50 dark:placeholder:text-white/50 placeholder:text-gray-500 min-h-[80px]"
             />
           </div>
 
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-white">Avatar Image</Label>
+            <Label className="text-white dark:text-white text-gray-900">Avatar Image</Label>
             <div className="flex items-center gap-4">
-              <div className="glass-input flex-1 p-4 border-2 border-dashed border-white/30">
+              <div className="glass-input flex-1 p-4 border-2 border-dashed border-white/30 dark:border-white/30 border-gray-300">
                 <div className="text-center">
-                  <Upload className="mx-auto h-8 w-8 text-white/60 mb-2" />
-                  <Label htmlFor="image" className="cursor-pointer text-white/80 hover:text-white">
+                  <Upload className="mx-auto h-8 w-8 text-white/60 dark:text-white/60 text-gray-400 mb-2" />
+                  <Label htmlFor="image" className="cursor-pointer text-white/80 dark:text-white/80 text-gray-600 hover:text-white dark:hover:text-white hover:text-gray-900">
                     Click to upload avatar image
                   </Label>
                   <Input
@@ -182,15 +185,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
           {/* Technical Specifications */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Palette className="h-4 w-4" />
                 3D Model Source *
               </Label>
               <Select value={formData.modelSource} onValueChange={(value) => handleInputChange("modelSource", value)}>
-                <SelectTrigger className="glass-input text-white">
+                <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                   <SelectValue placeholder="Select model source" />
                 </SelectTrigger>
-                <SelectContent className="glass-card-strong border-white/30">
+                <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                   <SelectItem value="custom-scan">Custom 3D Scan</SelectItem>
                   <SelectItem value="ai-generated">AI Generated</SelectItem>
                   <SelectItem value="pre-built">Pre-built Template</SelectItem>
@@ -202,15 +205,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Mic className="h-4 w-4" />
                 Voice Sample *
               </Label>
               <Select value={formData.voiceSample} onValueChange={(value) => handleInputChange("voiceSample", value)}>
-                <SelectTrigger className="glass-input text-white">
+                <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                   <SelectValue placeholder="Select voice type" />
                 </SelectTrigger>
-                <SelectContent className="glass-card-strong border-white/30">
+                <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                   <SelectItem value="synthetic">Synthetic Voice</SelectItem>
                   <SelectItem value="cloned">Voice Clone</SelectItem>
                   <SelectItem value="celebrity">Celebrity Voice</SelectItem>
@@ -222,15 +225,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 Role Type *
               </Label>
               <Select value={formData.roleType} onValueChange={(value) => handleInputChange("roleType", value)}>
-                <SelectTrigger className="glass-input text-white">
+                <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                   <SelectValue placeholder="Select role type" />
                 </SelectTrigger>
-                <SelectContent className="glass-card-strong border-white/30">
+                <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                   <SelectItem value="influencer">Influencer</SelectItem>
                   <SelectItem value="educator">Educator</SelectItem>
                   <SelectItem value="entertainer">Entertainer</SelectItem>
@@ -241,15 +244,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 Language Support *
               </Label>
               <Select value={formData.language} onValueChange={(value) => handleInputChange("language", value)}>
-                <SelectTrigger className="glass-input text-white">
+                <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
-                <SelectContent className="glass-card-strong border-white/30">
+                <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                   <SelectItem value="english">English</SelectItem>
                   <SelectItem value="spanish">Spanish</SelectItem>
                   <SelectItem value="french">French</SelectItem>
@@ -261,15 +264,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
           </div>
 
           <div className="space-y-2">
-            <Label className="text-white flex items-center gap-2">
+            <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
               Gesture Package *
             </Label>
             <Select value={formData.gesturePackage} onValueChange={(value) => handleInputChange("gesturePackage", value)}>
-              <SelectTrigger className="glass-input text-white">
+              <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                 <SelectValue placeholder="Select gesture package" />
               </SelectTrigger>
-              <SelectContent className="glass-card-strong border-white/30">
+              <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                 <SelectItem value="basic">Basic</SelectItem>
                 <SelectItem value="advanced">Advanced</SelectItem>
                 <SelectItem value="premium">Premium</SelectItem>
@@ -281,15 +284,15 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
           {/* NFT Configuration */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Shield className="h-4 w-4" />
                 NFT Type
               </Label>
               <Select value={formData.nftType} onValueChange={(value) => handleInputChange("nftType", value)}>
-                <SelectTrigger className="glass-input text-white">
+                <SelectTrigger className="glass-input text-white dark:text-white text-gray-900">
                   <SelectValue placeholder="Select NFT type" />
                 </SelectTrigger>
-                <SelectContent className="glass-card-strong border-white/30">
+                <SelectContent className="glass-card-strong border-white/30 dark:border-white/30 border-gray-300">
                   <SelectItem value="ERC-721">ERC-721</SelectItem>
                   <SelectItem value="ERC-1155">ERC-1155</SelectItem>
                 </SelectContent>
@@ -297,7 +300,7 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
+              <Label className="text-white dark:text-white text-gray-900 flex items-center gap-2">
                 <Percent className="h-4 w-4" />
                 Royalty Percentage (2-10%)
               </Label>
@@ -309,7 +312,7 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
                   handleInputChange("royaltyPercentage", value);
                 }}
                 placeholder="Enter royalty %"
-                className="glass-input text-white placeholder:text-white/50"
+                className="glass-input text-white dark:text-white text-gray-900 placeholder:text-white/50 dark:placeholder:text-white/50 placeholder:text-gray-500"
                 min="2"
                 max="10"
               />
@@ -318,10 +321,10 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
 
           {/* Personality Traits */}
           <div className="space-y-2">
-            <Label className="text-white">Personality Traits *</Label>
+            <Label className="text-white dark:text-white text-gray-900">Personality Traits *</Label>
             <div className="flex flex-wrap gap-2">
               {formData.personalityTraits.map(trait => (
-                <Badge key={trait} variant="secondary" className="glass-input text-white border-white/30 flex items-center gap-1">
+                <Badge key={trait} variant="secondary" className="glass-input text-white dark:text-white text-gray-900 border-white/30 dark:border-white/30 border-gray-300 flex items-center gap-1">
                   {trait}
                   <Button type="button" variant="ghost" size="icon" onClick={() => removePersonalityTrait(trait)} className="text-red-400 hover:bg-red-400/20 h-4 w-4 p-0">
                     <X className="h-3 w-3" />
@@ -335,7 +338,7 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
                 value={newTrait}
                 onChange={(e) => setNewTrait(e.target.value)}
                 placeholder="Enter trait"
-                className="glass-input text-white placeholder:text-white/50"
+                className="glass-input text-white dark:text-white text-gray-900 placeholder:text-white/50 dark:placeholder:text-white/50 placeholder:text-gray-500"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -343,11 +346,11 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
                   }
                 }}
               />
-              <Button type="button" onClick={addPersonalityTrait} className="glass-button text-white border-white/30">
+              <Button type="button" onClick={addPersonalityTrait} className="glass-button text-white dark:text-white text-gray-900 border-white/30 dark:border-white/30 border-gray-300">
                 Add Trait
               </Button>
             </div>
-            <div className="mt-1 text-sm text-white/60">
+            <div className="mt-1 text-sm text-white/60 dark:text-white/60 text-gray-500">
               Choose at least one personality trait for your avatar.
             </div>
           </div>
@@ -355,7 +358,7 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
           <Button
             type="submit"
             disabled={!isFormValid || isLoading}
-            className="w-full glass-button text-white border-white/30 hover:bg-white/25"
+            className="w-full glass-button text-white dark:text-white text-gray-900 border-white/30 dark:border-white/30 border-gray-300 hover:bg-white/25"
           >
             {isLoading ? (
               <>

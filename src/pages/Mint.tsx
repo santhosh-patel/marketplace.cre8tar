@@ -19,6 +19,7 @@ const Mint = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [mintedAvatar, setMintedAvatar] = useState<any>(null);
+  const [mintingProgress, setMintingProgress] = useState("");
 
   const updateUserBalance = async (newBalance: number) => {
     if (!user) {
@@ -71,10 +72,14 @@ const Mint = () => {
     setIsLoading(true);
     
     try {
+      setMintingProgress("Preparing avatar data...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       let imageUrl = "";
       
       // Upload image to storage if provided
       if (formData.imageFile) {
+        setMintingProgress("Uploading avatar image...");
         console.log('Uploading image to storage');
         const fileExt = formData.imageFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
@@ -97,6 +102,7 @@ const Mint = () => {
       }
 
       // Save NFT to database
+      setMintingProgress("Creating NFT on blockchain...");
       console.log('Saving NFT to database');
       const nftData = {
         user_id: user.id,
@@ -116,18 +122,21 @@ const Mint = () => {
 
       console.log('NFT data to insert:', nftData);
 
-      const { error: insertError } = await supabase
+      const { data: insertedNft, error: insertError } = await supabase
         .from('minted_nfts')
-        .insert(nftData);
+        .insert(nftData)
+        .select()
+        .single();
 
       if (insertError) {
         console.error('Database insert error:', insertError);
         throw insertError;
       }
 
-      console.log('NFT saved to database successfully');
+      console.log('NFT saved to database successfully:', insertedNft);
 
       // Deduct C8R balance
+      setMintingProgress("Processing payment...");
       console.log('Deducting balance');
       await updateUserBalance(balance - MINT_COST);
       await refreshBalance();
@@ -139,8 +148,11 @@ const Mint = () => {
         description: `Minted avatar: ${formData.name}`
       });
 
+      setMintingProgress("Finalizing avatar creation...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       console.log("Avatar minted successfully");
-      setMintedAvatar({ ...formData, imageUrl });
+      setMintedAvatar({ ...formData, imageUrl, nftId: insertedNft.id });
       
       toast({
         title: "Avatar Minted Successfully!",
@@ -169,6 +181,7 @@ const Mint = () => {
       });
     } finally {
       setIsLoading(false);
+      setMintingProgress("");
     }
   };
 
@@ -182,7 +195,7 @@ const Mint = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow flex items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-white dark:text-white text-gray-900">Loading...</div>
         </main>
         <Footer />
       </div>
@@ -197,10 +210,10 @@ const Mint = () => {
         <section className="py-12">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <h1 className="text-4xl font-bold mb-4 text-white">
+              <h1 className="text-4xl font-bold mb-4 text-white dark:text-white text-gray-900">
                 Mint Your <span className="gradient-text">Avatar NFT</span>
               </h1>
-              <p className="text-white/70">
+              <p className="text-white/70 dark:text-white/70 text-gray-600">
                 Create a unique AI-powered avatar NFT with customizable traits, voice, and personality.
                 Your avatar can generate content, earn revenue, and be deployed across platforms.
               </p>
@@ -209,6 +222,14 @@ const Mint = () => {
             {!mintedAvatar ? (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
+                  {isLoading && (
+                    <div className="mb-6 p-4 glass-card-strong border-white/30 dark:border-white/30 border-gray-300 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                        <span className="text-white dark:text-white text-gray-900">{mintingProgress}</span>
+                      </div>
+                    </div>
+                  )}
                   <AvatarCreationForm onMint={handleMint} isLoading={isLoading} />
                 </div>
                 
@@ -216,10 +237,10 @@ const Mint = () => {
                   <div className="sticky top-24">
                     <WalletConnect />
                     
-                    <div className="mt-6 glass-card-strong border-white/30 p-4">
-                      <h3 className="font-semibold mb-2 text-white">Minting Cost</h3>
+                    <div className="mt-6 glass-card-strong border-white/30 dark:border-white/30 border-gray-300 p-4">
+                      <h3 className="font-semibold mb-2 text-white dark:text-white text-gray-900">Minting Cost</h3>
                       <p className="text-2xl font-bold text-blue-400">{MINT_COST} $C8R</p>
-                      <p className="text-sm text-white/70 mt-1">
+                      <p className="text-sm text-white/70 dark:text-white/70 text-gray-600 mt-1">
                         Your balance: {balance} $C8R
                       </p>
                       {balance < MINT_COST && (
@@ -229,9 +250,9 @@ const Mint = () => {
                       )}
                     </div>
 
-                    <div className="mt-6 glass-card border-white/20 p-4">
-                      <h3 className="font-semibold mb-2 text-white">What You Get</h3>
-                      <ul className="text-sm space-y-1 text-white/80">
+                    <div className="mt-6 glass-card border-white/20 dark:border-white/20 border-gray-200 p-4">
+                      <h3 className="font-semibold mb-2 text-white dark:text-white text-gray-900">What You Get</h3>
+                      <ul className="text-sm space-y-1 text-white/80 dark:text-white/80 text-gray-700">
                         <li>• ERC-721 or ERC-1155 NFT ownership</li>
                         <li>• AI content generation</li>
                         <li>• Revenue earning potential</li>
