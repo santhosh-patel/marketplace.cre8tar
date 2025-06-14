@@ -1,22 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, ArrowUpRight, ArrowDownLeft, Zap, ShoppingCart, Coins } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
 
-interface Transaction {
-  id: string;
-  type: 'mint' | 'purchase' | 'stake' | 'reward' | 'transfer';
-  amount: number;
-  description: string;
-  timestamp: Date;
-  status: 'completed' | 'pending' | 'failed';
-}
-
 export function TransactionHistory() {
   const { transactions } = useWallet();
-  const [sortedTransactions, setSortedTransactions] = useState<Transaction[]>([]);
+  const [sortedTransactions, setSortedTransactions] = useState<any[]>([]);
 
   useEffect(() => {
     // Sort transactions by timestamp (newest first)
@@ -67,9 +57,9 @@ export function TransactionHistory() {
         <CardTitle className="text-white dark:text-white text-gray-900">Transaction History</CardTitle>
       </CardHeader>
       <CardContent>
-        {sortedTransactions.length > 0 ? (
+        {transactions.length > 0 ? (
           <div className="space-y-4">
-            {sortedTransactions.slice(0, 20).map((transaction) => (
+            {transactions.slice(0, 20).map((transaction) => (
               <div
                 key={transaction.id}
                 className="flex items-center justify-between p-4 glass-card border-white/20 dark:border-white/20 border-gray-200 rounded-lg"

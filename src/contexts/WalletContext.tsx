@@ -8,6 +8,7 @@ interface Transaction {
   amount: number;
   description: string;
   timestamp: Date;
+  status: 'completed' | 'pending' | 'failed';
 }
 
 interface Plugin {
@@ -194,7 +195,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addTransaction({
         type: 'purchase',
         amount: plugin.price,
-        description: `Purchased ${plugin.name}`
+        description: `Purchased ${plugin.name}`,
+        status: 'completed'
       });
 
       return true;
@@ -230,7 +232,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addTransaction({
         type: 'stake',
         amount,
-        description: `Staked ${amount} tokens`
+        description: `Staked ${amount} tokens`,
+        status: 'completed'
       });
 
       return true;
@@ -256,7 +259,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addTransaction({
         type: 'unstake',
         amount: stake.amount,
-        description: `Unstaked ${stake.amount} tokens`
+        description: `Unstaked ${stake.amount} tokens`,
+        status: 'completed'
       });
 
       return true;
@@ -291,7 +295,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addTransaction({
         type: 'claim',
         amount: stake.earnedRewards,
-        description: `Claimed ${stake.earnedRewards} rewards`
+        description: `Claimed ${stake.earnedRewards} rewards`,
+        status: 'completed'
       });
 
       return true;
