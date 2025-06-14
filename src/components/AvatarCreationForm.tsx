@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,12 +54,14 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
   ];
 
   const handleInputChange = (field: keyof AvatarFormData, value: any) => {
+    console.log('Form field changed:', field, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Image file selected:', file.name);
       setFormData(prev => ({ ...prev, imageFile: file }));
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result as string);
@@ -68,17 +71,35 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
 
   const addPersonalityTrait = () => {
     if (newTrait && !formData.personalityTraits.includes(newTrait)) {
+      console.log('Adding personality trait:', newTrait);
       handleInputChange("personalityTraits", [...formData.personalityTraits, newTrait]);
       setNewTrait("");
     }
   };
 
   const removePersonalityTrait = (trait: string) => {
+    console.log('Removing personality trait:', trait);
     handleInputChange("personalityTraits", formData.personalityTraits.filter(t => t !== trait));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData);
+    
+    // Validate required fields
+    const requiredFields = ['name', 'avatarId', 'modelSource', 'voiceSample', 'roleType', 'language', 'gesturePackage'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof AvatarFormData]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      return;
+    }
+    
+    if (formData.personalityTraits.length === 0) {
+      console.error('No personality traits selected');
+      return;
+    }
+    
     onMint(formData);
   };
 
@@ -284,7 +305,7 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
                 type="number"
                 value={formData.royaltyPercentage.toString()}
                 onChange={(e) => {
-                  const value = Math.max(2, Math.min(10, parseInt(e.target.value)));
+                  const value = Math.max(2, Math.min(10, parseInt(e.target.value) || 2));
                   handleInputChange("royaltyPercentage", value);
                 }}
                 placeholder="Enter royalty %"
@@ -302,8 +323,8 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
               {formData.personalityTraits.map(trait => (
                 <Badge key={trait} variant="secondary" className="glass-input text-white border-white/30 flex items-center gap-1">
                   {trait}
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removePersonalityTrait(trait)} className="text-red-400 hover:bg-red-400/20">
-                    <X className="h-4 w-4" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removePersonalityTrait(trait)} className="text-red-400 hover:bg-red-400/20 h-4 w-4 p-0">
+                    <X className="h-3 w-3" />
                   </Button>
                 </Badge>
               ))}
@@ -315,6 +336,12 @@ export function AvatarCreationForm({ onMint, isLoading }: AvatarCreationFormProp
                 onChange={(e) => setNewTrait(e.target.value)}
                 placeholder="Enter trait"
                 className="glass-input text-white placeholder:text-white/50"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addPersonalityTrait();
+                  }
+                }}
               />
               <Button type="button" onClick={addPersonalityTrait} className="glass-button text-white border-white/30">
                 Add Trait

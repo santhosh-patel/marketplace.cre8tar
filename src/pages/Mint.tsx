@@ -21,15 +21,23 @@ const Mint = () => {
   const [mintedAvatar, setMintedAvatar] = useState<any>(null);
 
   const updateUserBalance = async (newBalance: number) => {
-    if (!user) return;
+    if (!user) {
+      console.error('No user found when trying to update balance');
+      throw new Error('User not authenticated');
+    }
 
     try {
+      console.log('Updating user balance:', { userId: user.id, newBalance });
       const { error } = await supabase
         .from('profiles')
         .update({ c8r_balance: newBalance })
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error updating balance:', error);
+        throw error;
+      }
+      console.log('Balance updated successfully');
     } catch (error) {
       console.error('Error updating balance:', error);
       throw error;
@@ -37,12 +45,21 @@ const Mint = () => {
   };
 
   const handleMint = async (formData: any) => {
+    console.log('Starting mint process with data:', formData);
+    
     if (!user) {
+      console.log('No user found, redirecting to auth');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to mint an avatar.",
+        variant: "destructive"
+      });
       navigate("/auth");
       return;
     }
 
     if (balance < MINT_COST) {
+      console.log('Insufficient balance:', { balance, required: MINT_COST });
       toast({
         title: "Insufficient Balance",
         description: `You need ${MINT_COST} $C8R to mint an avatar. Your current balance is ${balance} $C8R.`,
@@ -58,6 +75,7 @@ const Mint = () => {
       
       // Upload image to storage if provided
       if (formData.imageFile) {
+        console.log('Uploading image to storage');
         const fileExt = formData.imageFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
         
@@ -66,6 +84,7 @@ const Mint = () => {
           .upload(fileName, formData.imageFile);
 
         if (uploadError) {
+          console.error('Image upload error:', uploadError);
           throw uploadError;
         }
 
@@ -74,32 +93,42 @@ const Mint = () => {
           .getPublicUrl(fileName);
           
         imageUrl = publicUrl;
+        console.log('Image uploaded successfully:', imageUrl);
       }
 
       // Save NFT to database
+      console.log('Saving NFT to database');
+      const nftData = {
+        user_id: user.id,
+        name: formData.name,
+        description: formData.description || null,
+        avatar_id: formData.avatarId,
+        image_url: imageUrl || null,
+        model_source: formData.modelSource,
+        voice_sample: formData.voiceSample,
+        personality_traits: formData.personalityTraits,
+        role_type: formData.roleType,
+        language: formData.language,
+        gesture_package: formData.gesturePackage,
+        nft_type: formData.nftType,
+        royalty_percentage: formData.royaltyPercentage
+      };
+
+      console.log('NFT data to insert:', nftData);
+
       const { error: insertError } = await supabase
         .from('minted_nfts')
-        .insert({
-          user_id: user.id,
-          name: formData.name,
-          description: formData.description,
-          avatar_id: formData.avatarId,
-          image_url: imageUrl,
-          model_source: formData.modelSource,
-          voice_sample: formData.voiceSample,
-          personality_traits: formData.personalityTraits,
-          role_type: formData.roleType,
-          language: formData.language,
-          gesture_package: formData.gesturePackage,
-          nft_type: formData.nftType,
-          royalty_percentage: formData.royaltyPercentage
-        });
+        .insert(nftData);
 
       if (insertError) {
+        console.error('Database insert error:', insertError);
         throw insertError;
       }
 
+      console.log('NFT saved to database successfully');
+
       // Deduct C8R balance
+      console.log('Deducting balance');
       await updateUserBalance(balance - MINT_COST);
       await refreshBalance();
 
@@ -110,7 +139,7 @@ const Mint = () => {
         description: `Minted avatar: ${formData.name}`
       });
 
-      console.log("Minting avatar with data:", formData);
+      console.log("Avatar minted successfully");
       setMintedAvatar({ ...formData, imageUrl });
       
       toast({
@@ -120,9 +149,22 @@ const Mint = () => {
       
     } catch (error) {
       console.error("Failed to mint avatar:", error);
+      
+      let errorMessage = "There was an error minting your avatar. Please try again.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('avatar_id')) {
+          errorMessage = "Avatar ID is required. Please provide a valid Avatar ID.";
+        } else if (error.message.includes('violates row-level security')) {
+          errorMessage = "Authentication error. Please try logging out and logging back in.";
+        } else if (error.message.includes('not-null')) {
+          errorMessage = "Please fill in all required fields.";
+        }
+      }
+      
       toast({
         title: "Minting Failed",
-        description: "There was an error minting your avatar. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -133,6 +175,19 @@ const Mint = () => {
   const handleCreateAnother = () => {
     setMintedAvatar(null);
   };
+
+  // Show loading if user auth state is not determined yet
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
