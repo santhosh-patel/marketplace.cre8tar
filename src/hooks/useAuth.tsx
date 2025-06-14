@@ -22,30 +22,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Initialize user profile with 2500 $C8R on first sign in
+        // Initialize user profile with correct balance on first sign in
         if (event === 'SIGNED_IN' && session?.user) {
           try {
-            const { data: existingProfile } = await supabase
+            console.log('Checking/creating profile for user:', session.user.id);
+            
+            // First check if profile exists
+            const { data: existingProfile, error: checkError } = await supabase
               .from('profiles')
               .select('c8r_balance')
               .eq('user_id', session.user.id)
               .single();
 
-            if (!existingProfile) {
-              await supabase
+            console.log('Existing profile check:', existingProfile, checkError);
+
+            // If no profile exists, create one with the correct balance
+            if (checkError && checkError.code === 'PGRST116') {
+              console.log('Creating new profile with 2500 C8R balance');
+              const { data: newProfile, error: insertError } = await supabase
                 .from('profiles')
                 .insert({
                   user_id: session.user.id,
                   name: session.user.user_metadata?.name || 'User',
                   email: session.user.email || '',
                   c8r_balance: 2500
-                });
+                })
+                .select()
+                .single();
+
+              console.log('Profile creation result:', newProfile, insertError);
+              
+              if (insertError) {
+                console.error('Error creating profile:', insertError);
+              }
+            } else if (!checkError && existingProfile) {
+              console.log('Profile exists with balance:', existingProfile.c8r_balance);
             }
           } catch (error) {
-            console.error('Error initializing user profile:', error);
+            console.error('Error handling user profile:', error);
           }
         }
         
@@ -53,7 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -64,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
+      console.log('Signing up user with name:', name);
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -76,6 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       });
+
+      console.log('Signup result:', data, error);
 
       if (data.user && !data.session && !error) {
         return { 
@@ -93,10 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Signing in user:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
+      console.log('Sign in result:', error);
       return { error };
     } catch (err: any) {
       console.error('Sign in error:', err);
@@ -105,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log('Signing out user');
     await supabase.auth.signOut();
   };
 

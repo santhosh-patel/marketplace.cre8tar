@@ -60,76 +60,108 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user) {
+      console.log('User logged in, fetching balance for:', user.id);
       fetchBalance();
       loadTransactions();
       loadPurchasedPlugins();
     } else {
+      console.log('User logged out, resetting wallet');
       resetWallet();
     }
   }, [user]);
 
   const fetchBalance = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, cannot fetch balance');
+      return;
+    }
 
     try {
+      console.log('Fetching balance from Supabase for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('c8r_balance')
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
-      setBalance(data?.c8r_balance || 0);
+      console.log('Balance fetch result:', data, error);
+
+      if (error) {
+        console.error('Error fetching balance:', error);
+        // If profile doesn't exist, it should have been created by the auth trigger
+        // but let's handle this case gracefully
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, will be created by trigger on next auth event');
+          setBalance(0);
+        }
+        return;
+      }
+      
+      const fetchedBalance = data?.c8r_balance || 0;
+      console.log('Setting balance to:', fetchedBalance);
+      setBalance(fetchedBalance);
     } catch (error) {
       console.error('Error fetching balance:', error);
+      setBalance(0);
     }
   };
 
   const loadTransactions = () => {
+    if (!user) return;
+    
     // Load transactions from localStorage for demo
-    const savedTransactions = localStorage.getItem(`transactions_${user?.id}`);
+    const savedTransactions = localStorage.getItem(`transactions_${user.id}`);
     if (savedTransactions) {
       const parsed = JSON.parse(savedTransactions).map((tx: any) => ({
         ...tx,
         timestamp: new Date(tx.timestamp)
       }));
       setTransactions(parsed);
+      console.log('Loaded transactions:', parsed.length);
     } else {
-      // Initial signup transaction
-      const initialTransaction: Transaction = {
-        id: '1',
-        type: 'signup',
-        amount: 2500,
-        description: 'Welcome bonus',
-        timestamp: new Date()
-      };
-      setTransactions([initialTransaction]);
-      localStorage.setItem(`transactions_${user?.id}`, JSON.stringify([initialTransaction]));
+      // Clear transactions for new session
+      setTransactions([]);
+      console.log('No saved transactions found');
     }
   };
 
   const loadPurchasedPlugins = () => {
+    if (!user) return;
+    
     // Load purchased plugins from localStorage for demo
-    const savedPlugins = localStorage.getItem(`plugins_${user?.id}`);
+    const savedPlugins = localStorage.getItem(`plugins_${user.id}`);
     if (savedPlugins) {
       const parsed = JSON.parse(savedPlugins).map((plugin: any) => ({
         ...plugin,
         purchasedAt: new Date(plugin.purchasedAt)
       }));
       setPurchasedPlugins(parsed);
+      console.log('Loaded plugins:', parsed.length);
+    } else {
+      setPurchasedPlugins([]);
+      console.log('No saved plugins found');
     }
   };
 
   const updateBalance = async (newBalance: number) => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, cannot update balance');
+      return;
+    }
 
     try {
+      console.log('Updating balance to:', newBalance, 'for user:', user.id);
       const { error } = await supabase
         .from('profiles')
         .update({ c8r_balance: newBalance })
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating balance:', error);
+        throw error;
+      }
+      
+      console.log('Balance updated successfully');
       setBalance(newBalance);
     } catch (error) {
       console.error('Error updating balance:', error);
@@ -138,7 +170,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const purchasePlugin = async (plugin: Omit<Plugin, 'id' | 'purchasedAt'>): Promise<boolean> => {
-    if (!user || balance < plugin.price) return false;
+    if (!user || balance < plugin.price) {
+      console.log('Cannot purchase plugin - insufficient balance or no user');
+      return false;
+    }
 
     try {
       // Deduct balance
@@ -267,25 +302,32 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const connectWallet = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, cannot connect wallet');
+      return;
+    }
 
     try {
+      console.log('Connecting wallet for user:', user.id);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const mockAddress = "0x" + Math.random().toString(16).slice(2, 12);
       setAddress(mockAddress);
       setIsConnected(true);
+      console.log('Wallet connected with address:', mockAddress);
     } catch (error) {
       console.error("Failed to connect wallet:", error);
     }
   };
 
   const disconnectWallet = () => {
+    console.log('Disconnecting wallet');
     setIsConnected(false);
     setAddress("");
   };
 
   const resetWallet = () => {
+    console.log('Resetting wallet state');
     setIsConnected(false);
     setAddress("");
     setBalance(0);
@@ -294,6 +336,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshBalance = async () => {
+    console.log('Refreshing balance');
     await fetchBalance();
   };
 
@@ -309,6 +352,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (user) {
       localStorage.setItem(`transactions_${user.id}`, JSON.stringify(updatedTransactions));
     }
+    
+    console.log('Added transaction:', newTransaction);
   };
 
   return (
